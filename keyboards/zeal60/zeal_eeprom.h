@@ -11,7 +11,7 @@
 // Bump this every time we change what we store
 // This will automatically reset the EEPROM with defaults
 // and avoid loading invalid data from the EEPROM
-#define EEPROM_VERSION 0x03
+#define EEPROM_VERSION 0x04
 #define EEPROM_VERSION_ADDR ((void*)34)
 
 #define EEPROM_BACKLIGHT_CONFIG_ADDR ((void*)35)
@@ -31,6 +31,11 @@
 // 4 keymaps = 560 bytes
 // 287 + 560 = 847
 // 847 < 1024 :-)
+
+// For Zeal65 this is 5*15*2=150 bytes
+// 4 keymaps = 600 bytes
+// 287 + 600 = 887
+// 887 < 1024 :-)
 
 bool eeprom_is_valid(void);
 void eeprom_set_valid(bool valid);
