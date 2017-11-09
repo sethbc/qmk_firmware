@@ -13,6 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <math.h>
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -436,8 +437,10 @@ void adjust_current(void) {
 }
 
 __attribute__ ((weak))
+
+#ifndef RGBLIGHT_CUSTOM_DRIVER
 void rgblight_set(void) {
-    
+
   #if defined(RGBSTRIP_CURRENT_LIMIT) && defined(RGBSTRIP_MAX_CURRENT_PER_LIGHT)
     adjust_current();
   #endif
@@ -465,6 +468,7 @@ void rgblight_set(void) {
     #endif
   }
 }
+#endif
 
 #ifdef RGBLIGHT_ANIMATIONS
 
@@ -535,13 +539,17 @@ void rgblight_task(void) {
 void rgblight_effect_breathing(uint8_t interval) {
   static uint8_t pos = 0;
   static uint16_t last_timer = 0;
+  float val;
 
   if (timer_elapsed(last_timer) < pgm_read_byte(&RGBLED_BREATHING_INTERVALS[interval])) {
     return;
   }
   last_timer = timer_read();
 
-  rgblight_sethsv_noeeprom(rgblight_config.hue, rgblight_config.sat, pgm_read_byte(&LED_BREATHING_TABLE[pos]));
+
+  // http://sean.voisen.org/blog/2011/10/breathing-led-with-arduino/
+  val = (exp(sin((pos/255.0)*M_PI)) - RGBLIGHT_EFFECT_BREATHE_CENTER/M_E)*(RGBLIGHT_EFFECT_BREATHE_MAX/(M_E-1/M_E));
+  rgblight_sethsv_noeeprom(rgblight_config.hue, rgblight_config.sat, val);
   pos = (pos + 1) % 256;
 }
 void rgblight_effect_rainbow_mood(uint8_t interval) {
@@ -560,7 +568,7 @@ void rgblight_effect_rainbow_swirl(uint8_t interval) {
   static uint16_t last_timer = 0;
   uint16_t hue;
   uint8_t i;
-  if (timer_elapsed(last_timer) < pgm_read_byte(&RGBLED_RAINBOW_MOOD_INTERVALS[interval / 2])) {
+  if (timer_elapsed(last_timer) < pgm_read_byte(&RGBLED_RAINBOW_SWIRL_INTERVALS[interval / 2])) {
     return;
   }
   last_timer = timer_read();
